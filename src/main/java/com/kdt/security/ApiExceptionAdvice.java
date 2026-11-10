@@ -24,4 +24,9 @@ public class ApiExceptionAdvice {
         return ResponseEntity.badRequest()
                              .body(new ApiError("INVALID_INPUT", "invalid input"));
     }
+
+    @ExceptionHandler(LoginFailedException.class)
+    public ResponseEntity<ApiError> loginFailed(LoginFailedException ex) {
+        return ResponseEntity.status(401).body(new ApiError("LOGIN_FAILED", "login failed"));
+    }
 }

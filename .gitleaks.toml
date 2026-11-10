@@ -11,6 +11,14 @@ secretGroup = 1
 regexTarget = "secret"
 regexes = ['''^\$\{[A-Z][A-Z0-9_]*\}$''', '''^(?:YOUR_[A-Z0-9_]+|null|None)$''']
 
+
+# Only HTTP Client variable references in test request files are allowed.
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "secret"
+paths = ['''(?:^|/)src/test/http/.*\.http$''']
+regexes = ['''^\{\{[A-Za-z_][A-Za-z0-9_]*\}\}$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"
