@@ -33,4 +33,6 @@ public class Member {
     // 화면에 보여 줄 이름입니다. 본인 확인의 기준값으로 사용하지 않습니다.
     private String nickname;
 
+    @Column(length = 100)
+    private String password;
 }
