@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: kdt-security
+
+# 필요한 비밀 값은 ${DB_PASSWORD} 등 환경변수로 참조하세요.
