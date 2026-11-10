@@ -19,5 +19,12 @@ public class AuthPasswordSeeder implements ApplicationRunner {
     @Override
     public void run(ApplicationArguments args) throws Exception {
 
+        this.memberRepository.findByLoginId("kdt01")
+                .ifPresent(member -> {
+            if (member.getPassword() == null || member.getPassword() .isBlank()) {
+                member.setPassword(this.passwordEncoder.encode("kimbap12"));
+                this.memberRepository.save(member);
+            }
+        });
     }
 }
