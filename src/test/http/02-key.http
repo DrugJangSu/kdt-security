@@ -1,0 +1,67 @@
+# 실행 환경은 local을 선택합니다. 키 발급 응답은 private 환경 파일에만 복사하세요.
+@base = http://127.0.0.1:8080
+# 발급받은 키는 http-client.private.env.json의 local.testApiKey에 넣으세요.
+# 1번 목록의 kdt01 항목에서 memberId를 복사합니다.
+@ownMemberId = 1
+# 3번 생성 응답의 id를 복사합니다. 기존 시드 글을 삭제하지 않습니다.
+@ownPostId = 4
+# 1번 목록의 kdt02 글에서 id를 복사합니다.
+@otherPostId = 3
+
+### 1. 목록: 200. 위 ownMemberId·otherPostId를 채웁니다.
+GET {{base}}/api/v1/posts
+
+### 2. 키 발급: 200. apiKey 값만 key에 복사합니다.
+POST {{base}}/api/v1/auth/api-key
+Content-Type: application/json
+
+{"loginId":"kdt01","password":"{{testLoginPassword}}"}
+
+### 3. 연습 글 생성: 201. 응답 id를 ownPostId에 복사합니다.
+# 이 단계의 POST는 인증 없이 memberId를 받습니다. 05에서는 인증된 회원을 작성자로 정합니다.
+POST {{base}}/api/v1/posts
+Content-Type: application/json
+
+{"memberId":{{ownMemberId}},"title":"API Key 연습 글","body":"이 글만 수정하고 삭제합니다."}
+
+### 4. 자기 글 수정: 200. 응답 loginId는 kdt01입니다.
+PUT {{base}}/api/v1/posts/{{ownPostId}}
+X-Api-Key: {{testApiKey}}
+Content-Type: application/json
+
+{"title":"키로 수정한 글","body":"권한 검사 후 변경했습니다."}
+
+### 5. 키 없음: 401 API_KEY_FAILED. 4번의 글은 바뀌지 않습니다.
+PUT {{base}}/api/v1/posts/{{ownPostId}}
+Content-Type: application/json
+
+{"title":"변경되면 안 됩니다","body":"거절 확인"}
+
+### 6. 남의 글 수정: 403 FORBIDDEN
+PUT {{base}}/api/v1/posts/{{otherPostId}}
+X-Api-Key: {{testApiKey}}
+Content-Type: application/json
+
+{"title":"변경되면 안 됩니다","body":"거절 확인"}
+
+### 7. 남의 글 삭제: 403 FORBIDDEN
+DELETE {{base}}/api/v1/posts/{{otherPostId}}
+X-Api-Key: {{testApiKey}}
+
+### 8. 목록: 자기 글 제목은 4번 값이고 남의 글은 1번 값 그대로입니다.
+GET {{base}}/api/v1/posts
+
+### 9. 자기 연습 글 삭제: 204, 응답 본문 없음
+DELETE {{base}}/api/v1/posts/{{ownPostId}}
+X-Api-Key: {{testApiKey}}
+
+### 10. 목록: ownPostId는 없고 otherPostId와 기존 시드 글은 남습니다.
+GET {{base}}/api/v1/posts
+
+### 11. 방금 삭제한 글 수정: 404 NOT_FOUND
+# 키 인증은 성공하지만 글이 없어서 변경을 진행하지 않습니다.
+PUT {{base}}/api/v1/posts/{{ownPostId}}
+X-Api-Key: {{testApiKey}}
+Content-Type: application/json
+
+{"title":"없는 글","body":"404 확인"}

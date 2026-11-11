@@ -55,4 +55,5 @@ public class ApiExceptionAdvice {
         // 403은 "금지됨"입니다. 401(누군지 모름)과 구분해서 보냅니다.
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("FORBIDDEN", "forbidden"));
     }
+
 }
