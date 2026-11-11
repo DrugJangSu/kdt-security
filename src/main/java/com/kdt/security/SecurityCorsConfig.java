@@ -1,11 +1,16 @@
+// 이 파일이 들어 있는 폴더(패키지) 이름입니다.
 package com.kdt.security;
 
+// 이 클래스가 설정용 클래스임을 알리는 어노테이션입니다.
 import org.springframework.context.annotation.Configuration;
+// CORS(다른 주소의 화면이 이 서버를 호출해도 되는지) 규칙을 설정하는 도구들을 가져옵니다.
 import org.springframework.web.servlet.config.annotation.*;
 
 // Spring이 이 클래스의 설정과 @Bean 메서드를 읽어 적용합니다.
 @Configuration
+// WebMvcConfigurer를 구현하면 웹(MVC) 동작을 우리 입맛대로 바꿀 수 있습니다.
 public class SecurityCorsConfig implements WebMvcConfigurer {
+    // 부모 클래스의 메서드를 우리 방식으로 다시 정의한다는 표시입니다.
     @Override
     // 다른 Origin의 화면이 사용할 경로·메서드·헤더를 선언합니다.
     public void addCorsMappings(CorsRegistry registry) {

@@ -1,12 +1,20 @@
+// 이 파일이 들어 있는 폴더(패키지) 이름입니다.
 package com.kdt.security;
 
+// final 필드를 받는 생성자를 Lombok이 자동으로 만들어 주는 어노테이션입니다.
 import lombok.RequiredArgsConstructor;
 
+// 글 여러 개를 목록으로 담기 위해 가져옵니다.
 import java.util.List;
+// 요청으로 받은 값이 규칙을 지키는지 검사하게 해 주는 어노테이션입니다.
 import jakarta.validation.Valid;
+// Swagger 문서에서 각 API의 설명을 적을 때 쓰는 어노테이션입니다.
 import io.swagger.v3.oas.annotations.Operation;
+// Swagger 문서에서 API를 이름별로 묶어 보여 줄 때 쓰는 어노테이션입니다.
 import io.swagger.v3.oas.annotations.tags.Tag;
+// 201, 204 같은 HTTP 상태 코드를 이름으로 쓰기 위해 가져옵니다.
 import org.springframework.http.HttpStatus;
+// @GetMapping, @PostMapping, @PathVariable 등 웹 요청용 어노테이션을 한꺼번에 가져옵니다.
 import org.springframework.web.bind.annotation.*;
 
 // Swagger 문서에 표시할 이름과 설명입니다. 요청의 인증·인가 규칙은 별도로 작성합니다.
@@ -22,6 +30,7 @@ public class PostApiController {
     // Controller가 받은 글 요청을 실제 조회·변경 처리로 연결합니다.
     private final PostService postService;
 
+    // Swagger 문서에 표시될 설명입니다.
     @Operation(summary = "List posts")
     // GET /api/v1/posts 요청을 바로 아래 메서드에 연결합니다.
     @GetMapping
@@ -29,6 +38,7 @@ public class PostApiController {
     // 목록 조회는 서비스가 수행하고, 반환된 DTO 목록이 JSON 응답이 됩니다.
     public List<PostResponse> list() { return postService.list(); }
 
+    // Swagger 문서에 표시될 설명입니다.
     @Operation(summary = "Create post")
     // POST /api/v1/posts 요청을 바로 아래 메서드에 연결합니다.
     @PostMapping
@@ -41,6 +51,7 @@ public class PostApiController {
         return postService.create(request);
     }
 
+    // Swagger 문서에 표시될 설명입니다.
     @Operation(summary = "Update post")
     // PUT /api/v1/posts/{id} 요청을 바로 아래 메서드에 연결합니다.
     @PutMapping("/{id}")
@@ -53,6 +64,7 @@ public class PostApiController {
         return postService.update(id, request);
     }
 
+    // Swagger 문서에 표시될 설명입니다.
     @Operation(summary = "Delete post")
     // DELETE /api/v1/posts/{id} 요청을 바로 아래 메서드에 연결합니다.
     @DeleteMapping("/{id}")

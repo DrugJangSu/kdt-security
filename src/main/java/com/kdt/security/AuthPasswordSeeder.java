@@ -1,10 +1,17 @@
+// 이 파일이 들어 있는 폴더(패키지) 이름입니다.
 package com.kdt.security;
 
+// final 필드를 받는 생성자를 Lombok이 자동으로 만들어 주는 어노테이션입니다.
 import lombok.RequiredArgsConstructor;
+// 앱이 시작될 때 전달된 실행 인자를 담은 객체입니다.
 import org.springframework.boot.ApplicationArguments;
+// 이 인터페이스를 구현하면 앱이 켜진 직후 run 메서드가 한 번 자동 실행됩니다.
 import org.springframework.boot.ApplicationRunner;
+// 여러 Runner 중 실행 순서(작은 숫자가 먼저)를 정하는 어노테이션입니다.
 import org.springframework.core.annotation.Order;
+// 비밀번호 암호화·비교 도구의 공통 규격입니다. 실제로는 BCrypt가 들어옵니다.
 import org.springframework.security.crypto.password.PasswordEncoder;
+// Spring이 이 클래스를 찾아 관리하게 하는 어노테이션입니다.
 import org.springframework.stereotype.Component;
 
 // Spring이 이 클래스를 찾아 관리할 빈으로 등록합니다.
@@ -21,6 +28,7 @@ public class AuthPasswordSeeder implements ApplicationRunner {
     // 비밀번호를 해시로 저장하거나, 저장된 해시로 입력 비밀번호가 맞는지 확인할 때 사용합니다.
     private final PasswordEncoder passwordEncoder;
 
+    // 부모 인터페이스(ApplicationRunner)의 메서드를 우리 방식으로 구현한다는 표시입니다.
     @Override
     // 회원 시드가 끝난 뒤 비어 있는 kdt01 비밀번호에만 해시를 저장합니다.
     public void run(ApplicationArguments args) {
@@ -28,6 +36,7 @@ public class AuthPasswordSeeder implements ApplicationRunner {
                 // 앞 Runner가 준비한 회원을 찾습니다. 없으면 ifPresent 안은 실행하지 않습니다.
                 .findByLoginId("kdt01")
                 .ifPresent(
+                        // member는 찾아낸 kdt01 회원입니다. 아래 중괄호 안이 "찾았을 때 할 일"입니다.
                         member -> {
                             // 비밀번호가 아직 없는 경우만 채웁니다. 이미 등록된 해시를 재시작 때 덮어쓰지 않습니다.
                             // IDE에서 앱을 다시 Run해도 이미 해시가 있는 회원은 이 조건을 통과하지 않습니다.

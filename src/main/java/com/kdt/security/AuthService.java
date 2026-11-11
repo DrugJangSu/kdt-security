@@ -1,10 +1,16 @@
+// 이 파일이 들어 있는 폴더(패키지) 이름입니다.
 package com.kdt.security;
 
+// final 필드를 받는 생성자를 Lombok이 자동으로 만들어 주는 어노테이션입니다.
 import lombok.RequiredArgsConstructor;
+// 비밀번호 암호화·비교 도구의 공통 규격입니다. 실제로는 BCrypt가 들어옵니다.
 import org.springframework.security.crypto.password.PasswordEncoder;
+// 이 클래스를 "서비스"로 Spring에 등록하는 어노테이션입니다.
 import org.springframework.stereotype.Service;
+// DB 작업을 한 묶음(트랜잭션)으로 처리하게 하는 어노테이션입니다.
 import org.springframework.transaction.annotation.Transactional;
 
+// 겹칠 가능성이 거의 없는 랜덤 문자열(UUID)을 만드는 도구입니다. API 키를 만들 때 씁니다.
 import java.util.UUID;
 
 // 요청의 처리 순서와 DB 작업을 담당하는 Service를 Spring 빈으로 등록합니다.
@@ -29,13 +35,17 @@ public class AuthService {
         // 2. DB에 저장된 비밀번호 해시를 읽습니다.
         String stored = member.getPassword();
         // 해시가 없거나 입력이 72바이트를 넘으면 로그인 실패.
+        // (BCrypt는 72바이트까지만 비교하므로, 너무 긴 입력은 미리 막습니다.)
         if (stored == null
                 || stored.isBlank()
                 || request.password().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            // 위 조건 중 하나라도 맞으면 로그인 실패 예외를 던져 즉시 끝냅니다.
             throw new LoginFailedException();
         }
         // 3. 입력 비밀번호가 저장된 해시와 맞는지 확인합니다. 틀리면 로그인 실패.
+        // matches(입력, 해시): 입력을 같은 방식으로 암호화해 해시와 맞는지 비교합니다. 해시를 풀어서 비교하는 게 아닙니다.
         if (!this.passwordEncoder.matches(request.password(), stored)) {
+            // 비밀번호가 틀렸으니 로그인 실패 예외를 던집니다.
             throw new LoginFailedException();
         }
         // 4. 성공한 회원의 아이디·닉네임만 반환합니다.
@@ -57,10 +67,12 @@ public class AuthService {
         if (stored == null
                 || stored.isBlank()
                 || request.password().getBytes(java.nio.charset.StandardCharsets.UTF_8).length > 72) {
+            // 조건에 걸리면 로그인 실패 예외를 던져 즉시 끝냅니다.
             throw new LoginFailedException();
         }
         // 3. 입력 비밀번호가 저장된 해시와 맞는지 확인합니다. 틀리면 로그인 실패.
         if (!this.passwordEncoder.matches(request.password(), stored)) {
+            // 비밀번호가 틀렸으니 로그인 실패 예외를 던집니다.
             throw new LoginFailedException();
         }
         // 4. 비밀번호 확인 후에만 36자 랜덤 키를 만듭니다.

@@ -1,6 +1,9 @@
+// 이 파일이 들어 있는 폴더(패키지) 이름입니다.
 package com.kdt.security;
 
+// Swagger 문서에서 보여 줄 API 묶음(그룹)을 만드는 도구입니다.
 import org.springdoc.core.models.GroupedOpenApi;
+// @Configuration, @Bean 등 설정용 어노테이션을 한꺼번에 가져옵니다.
 import org.springframework.context.annotation.*;
 
 // Spring이 이 클래스의 설정과 @Bean 메서드를 읽어 적용합니다.

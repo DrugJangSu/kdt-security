@@ -1,10 +1,16 @@
+// 이 파일이 들어 있는 폴더(패키지) 이름입니다.
 package com.kdt.security;
 
+// final 필드를 받는 생성자를 Lombok이 자동으로 만들어 주는 어노테이션입니다.
 import lombok.RequiredArgsConstructor;
 
+// 글 여러 개를 목록으로 담기 위해 가져옵니다.
 import java.util.List;
+// 조회 결과의 정렬 기준(id 순서 등)을 지정하는 도구입니다.
 import org.springframework.data.domain.Sort;
+// 이 클래스를 "서비스"로 Spring에 등록하는 어노테이션입니다.
 import org.springframework.stereotype.Service;
+// DB 작업을 한 묶음(트랜잭션)으로 처리하게 하는 어노테이션입니다.
 import org.springframework.transaction.annotation.Transactional;
 
 // 요청의 처리 순서와 DB 작업을 담당하는 Service를 Spring 빈으로 등록합니다.
@@ -40,6 +46,7 @@ public class PostService {
         post.setMember(member);
         // 새 글에 입력 제목을 설정합니다. 아래 setBody는 입력 본문을 설정합니다.
         post.setTitle(request.title());
+        // 새 글에 입력 본문을 설정합니다.
         post.setBody(request.body());
         // INSERT로 글 번호를 받은 뒤 DTO로 변환합니다. 엔티티 자체를 응답하지 않습니다.
         return toResponse(postRepository.save(post));
@@ -55,6 +62,7 @@ public class PostService {
                                   .orElseThrow(() -> new NotFoundException("post missing"));
         // 조회한 글의 제목·본문을 바꿉니다. 이 지점까지 필요한 검사를 통과해야 합니다.
         post.setTitle(request.title());
+        // 본문도 새 값으로 바꿉니다. save를 따로 부르지 않아도 트랜잭션이 끝날 때 자동으로 DB에 반영됩니다.
         post.setBody(request.body());
         // DTO를 만들면서 트랜잭션 안에서 연관 회원 정보도 읽습니다. 수정값은 정상 종료 시 DB에 반영됩니다.
         return toResponse(post);
