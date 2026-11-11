@@ -19,6 +19,14 @@ regexTarget = "secret"
 paths = ['''(?:^|/)src/test/http/.*\.http$''']
 regexes = ['''^\{\{[A-Za-z_][A-Za-z0-9_]*\}\}$''']
 
+
+# A complete UUID generation statement is code, not a hardcoded credential.
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "line"
+paths = ['''(?:^|/)src/main/java/.*\.java$''']
+regexes = ['''^\s*String\s+apiKey\s*=\s*UUID\.randomUUID\(\)\.toString\(\);\s*$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"

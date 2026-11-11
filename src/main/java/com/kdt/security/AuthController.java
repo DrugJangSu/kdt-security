@@ -22,4 +22,10 @@ public class AuthController {
 
         return this.authService.login(request);
     }
+
+    @Operation(summary = "Issue API key")
+    @PostMapping("/api-key")
+    public ApiKeyResponse issueApiKey(@Valid @RequestBody LoginRequest request) {
+        return this.authService.issueApiKey(request);
+    }
 }
