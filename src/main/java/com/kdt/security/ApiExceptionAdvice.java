@@ -39,4 +39,20 @@ public class ApiExceptionAdvice {
         // 아이디가 없든 비밀번호가 틀리든 똑같은 문장만 보내서, 공격자가 이유를 추측하지 못하게 합니다.
         return ResponseEntity.status(401).body(new ApiError("LOGIN_FAILED", "login failed"));
     }
+
+    // API 키가 없거나 틀려서 ApiKeyFailedException이 발생하면 아래 메서드가 처리합니다. (인터셉터에서 던진 예외도 여기로 옵니다)
+    @ExceptionHandler(ApiKeyFailedException.class)
+    // 출입증(API 키)을 확인하지 못한 요청을 401(인증 실패) 응답으로 바꿉니다.
+    public ResponseEntity<ApiError> apiKeyFailed(ApiKeyFailedException ex) {
+        // 키가 없는지, 틀린 건지는 알려 주지 않고 똑같은 문장만 보냅니다.
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(new ApiError("API_KEY_FAILED", "api key failed"));
+    }
+
+    // 권한 없음 예외(ForbiddenException)가 발생하면 아래 메서드가 처리합니다.
+    @ExceptionHandler(ForbiddenException.class)
+    // 누구인지는 확인됐지만 이 일을 할 권한이 없는 요청(남의 글 수정 등)을 403 응답으로 바꿉니다.
+    public ResponseEntity<ApiError> forbidden(ForbiddenException ex) {
+        // 403은 "금지됨"입니다. 401(누군지 모름)과 구분해서 보냅니다.
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("FORBIDDEN", "forbidden"));
+    }
 }
