@@ -35,4 +35,7 @@ public class Member {
 
     @Column(length = 100)
     private String password;
+
+    @Column(name = "api_key", length = 36, unique = true)
+    private String apiKey;
 }
