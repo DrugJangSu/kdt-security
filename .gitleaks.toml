@@ -27,6 +27,14 @@ regexTarget = "line"
 paths = ['''(?:^|/)src/main/java/.*\.java$''']
 regexes = ['''^\s*String\s+apiKey\s*=\s*UUID\.randomUUID\(\)\.toString\(\);\s*$''']
 
+
+# Maven coordinates for JJWT are public dependency identifiers, not tokens.
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "line"
+paths = ['''(?:^|/)build\.gradle$''']
+regexes = ['''^\s*(?:implementation|runtimeOnly)\s+'io\.jsonwebtoken:jjwt-(?:api|impl|jackson):[0-9]+\.[0-9]+\.[0-9]+'\s*$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"
