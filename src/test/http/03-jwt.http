@@ -1,0 +1,78 @@
+# HTTP Client의 URL 변수입니다. 서버의 환경변수가 아닙니다.
+@base = http://127.0.0.1:8080
+# access·refresh는 1번·5번 응답에서 자동으로 저장됩니다. 파일에 직접 적지 않습니다.
+
+### 1. 발급: 200, 토큰 두 항목
+# 비밀번호로 토큰을 발급받고, 응답의 두 토큰을 자동으로 저장합니다.
+# POST: 아이디·비밀번호를 서버로 보내 토큰을 요청합니다.
+POST {{base}}/api/v1/auth/token
+# 본문이 JSON 형식이라고 서버에 알립니다.
+Content-Type: application/json
+
+# 요청 본문: 로그인에 쓸 아이디와 비밀번호입니다. 빈 줄 아래가 본문입니다.
+{"loginId":"kdt01","password":"{{testLoginPassword}}"}
+
+# 아래 > {% %} 안은 응답을 받은 뒤 실행되는 스크립트입니다. 응답 JSON의 두 토큰을 access·refresh 변수에 저장해 다음 요청에서 {{access}}, {{refresh}}로 씁니다.
+> {% client.global.set("access", response.body.accessToken); client.global.set("refresh", response.body.refreshToken); %}
+
+### 2. access 사용: 200 {"loginId":"kdt01"}
+# Authorization 헤더에 access를 담아 보냅니다.
+# GET: 내가 누구인지 조회합니다.
+GET {{base}}/api/v1/auth/me
+# "Bearer " 뒤에 access 토큰을 붙이는 것이 JWT를 보내는 표준 방식입니다.
+Authorization: Bearer {{access}}
+
+### 3. 헤더 없음: 401 TOKEN_FAILED
+# 헤더를 보내지 않으면 access가 없으므로 401입니다.
+# Authorization 헤더를 일부러 뺀 요청입니다.
+GET {{base}}/api/v1/auth/me
+
+### 4. refresh를 잘못 사용: 401 TOKEN_FAILED
+# refresh는 서명이 유효해도 /me가 요구하는 용도가 아니므로 401입니다.
+# 일부러 access 자리에 refresh 토큰을 넣어 봅니다.
+GET {{base}}/api/v1/auth/me
+Authorization: Bearer {{refresh}}
+
+### 5. 재발급: 200, 새 accessToken·refreshToken
+# refresh로 새 토큰 쌍을 받습니다. 새 access만 저장하고, refresh는 8번 확인을 위해 옛 값을 유지합니다.
+# 실행 후 2번을 한 번 더 눌러 새 access로 200이 나오는지 확인합니다.
+# 재발급 요청입니다.
+POST {{base}}/api/v1/auth/token/refresh
+# 본문이 JSON 형식이라고 알립니다.
+Content-Type: application/json
+
+# 저장해 둔 refresh 토큰을 본문에 담아 보냅니다.
+{"refreshToken":"{{refresh}}"}
+
+# 응답의 새 access 토큰만 변수에 덮어씁니다.
+> {% client.global.set("access", response.body.accessToken); %}
+
+### 6. 빈 refreshToken 요청 — 예상 응답 400 INVALID_INPUT
+# 빈 문자열은 토큰 검증 전에 @Valid에서 400으로 거절됩니다.
+# 재발급 요청이지만 토큰 칸을 비웠습니다.
+POST {{base}}/api/v1/auth/token/refresh
+# 본문이 JSON 형식이라고 알립니다.
+Content-Type: application/json
+
+# 빈 문자열이라 @NotBlank 검사에 걸립니다.
+{"refreshToken":""}
+
+### 7. access로 재발급 요청: 401 TOKEN_FAILED
+# 서명은 유효해도 재발급 용도가 아니므로 거절됩니다.
+# 재발급 요청입니다.
+POST {{base}}/api/v1/auth/token/refresh
+# 본문이 JSON 형식이라고 알립니다.
+Content-Type: application/json
+
+# refresh 자리에 access 토큰을 일부러 넣었습니다.
+{"refreshToken":"{{access}}"}
+
+### 8. 5번에서 사용한 옛 refresh를 다시 전송: 현재 구현에서는 200
+# 새로 발급받아도 옛 refresh가 자동으로 막히지 않는다는 점을 확인합니다.
+# 재발급 요청입니다.
+POST {{base}}/api/v1/auth/token/refresh
+# 본문이 JSON 형식이라고 알립니다.
+Content-Type: application/json
+
+# 5번 전에 저장해 둔 옛 refresh를 다시 보냅니다.
+{"refreshToken":"{{refresh}}"}

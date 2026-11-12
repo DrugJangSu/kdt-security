@@ -35,6 +35,19 @@ regexTarget = "line"
 paths = ['''(?:^|/)build\.gradle$''']
 regexes = ['''^\s*(?:implementation|runtimeOnly)\s+'io\.jsonwebtoken:jjwt-(?:api|impl|jackson):[0-9]+\.[0-9]+\.[0-9]+'\s*$''']
 
+
+# Token extraction and an empty-token guard contain no literal credentials.
+# 비밀번호 검사 도구가 'token' 변수 줄을 비밀 값으로 오해하지 않도록 예외로 허용하는 규칙입니다.
+[[rules.allowlists]]
+# 아래 paths와 regexes 조건을 둘 다 만족할 때만 예외로 인정합니다.
+condition = "AND"
+# 파일 전체가 아니라 한 줄씩 비교합니다.
+regexTarget = "line"
+# 예외를 적용할 파일: AuthService.java 또는 JwtService.java 뿐입니다.
+paths = ['''(?:^|/)src/main/java/com/kdt/security/(?:AuthService|JwtService)\.java$''']
+# 예외로 허용할 줄 3가지: 헤더에서 토큰 꺼내기, Bearer 떼고 다듬기, 토큰이 비었는지 검사하기.
+regexes = ['''^\s*String\s+token\s*=\s*this\.jwtService\.bearerValue\(authorization\);\s*$''', '''^\s*String\s+token\s*=\s*authorization\.substring\("Bearer "\.length\(\)\)\.trim\(\);\s*$''', '''^\s*if\s*\(token\s*==\s*null\s*\|\|\s*token\.isBlank\(\)\)\s*\{\s*$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"

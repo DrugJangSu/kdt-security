@@ -56,4 +56,13 @@ public class ApiExceptionAdvice {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(new ApiError("FORBIDDEN", "forbidden"));
     }
 
+    // JWT 토큰이 없거나 위조·만료·용도 불일치라서 TokenFailedException이 발생하면 아래 메서드가 처리합니다.
+    @ExceptionHandler(TokenFailedException.class)
+    // 토큰을 믿을 수 없는 요청을 401(인증 실패) 응답으로 바꿉니다.
+    public ResponseEntity<ApiError> handleTokenFailed(TokenFailedException ex) {
+        // 만료인지 위조인지 알려 주지 않고 똑같은 문장만 보내서, 공격자에게 단서를 주지 않습니다.
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new ApiError("TOKEN_FAILED", "token failed"));
+    }
+
 }
