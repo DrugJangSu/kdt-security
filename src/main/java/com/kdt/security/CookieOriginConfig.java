@@ -33,10 +33,10 @@ public class CookieOriginConfig implements WebMvcConfigurer {
                             throw new ForbiddenException();
                         }
                         // 4. 명단에 있으면 통과
-                        return true;                                       // ← 빨간 줄 ① 해결
+                        return true;
                     }
                 }
-        ).addPathPatterns(                                                 // ← 빨간 줄 ② 해결
+        ).addPathPatterns(
                 "/api/v1/auth/token-cookie",
                 "/api/v1/auth/token/refresh-cookie",
                 "/api/v1/auth/logout-cookie");
