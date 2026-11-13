@@ -14,7 +14,7 @@ public class CookieAuthWriter {
     public static final String REFRESH = "refreshToken";
     public static final String DEMO = "demoVisible";
 
-    public void writerRefresh(HttpServletResponse response, String refreshToken) {
+    public void writeRefresh(HttpServletResponse response, String refreshToken) {
         ResponseCookie cookie = ResponseCookie.from(REFRESH, refreshToken)
                 .httpOnly(true)
                 .secure(false)
