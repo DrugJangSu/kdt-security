@@ -1,0 +1,92 @@
+# HTTP Client의 URL 변수입니다. 서버의 환경변수가 아닙니다.
+@base = http://127.0.0.1:8080
+# access·refreshCookie는 1번·2번 응답에서 자동으로 저장됩니다. 파일에 직접 적지 않습니다.
+
+### 1. 쿠키 발급: JSON access 하나와 Set-Cookie 두 줄
+# refresh는 Set-Cookie, access는 JSON으로 받고 둘 다 자동 저장합니다.
+// @no-cookie-jar
+POST {{base}}/api/v1/auth/token-cookie
+Origin: http://127.0.0.1:8080
+Content-Type: application/json
+
+{"loginId":"kdt01","password":"{{testLoginPassword}}"}
+
+> {%
+    client.global.set("access", response.body.accessToken);
+    const cookies = response.headers.valuesOf("Set-Cookie");
+    for (let i = 0; i < cookies.length; i++) {
+        if (cookies[i].startsWith("refreshToken=")) {
+            client.global.set("refreshCookie", cookies[i].split(";")[0].substring("refreshToken=".length));
+        }
+    }
+%}
+
+### 2. 쿠키 재발급: JSON access 하나와 갱신 Set-Cookie
+# Cookie의 refresh로 재발급하고, 새 access·새 refresh를 자동 저장합니다.
+// @no-cookie-jar
+POST {{base}}/api/v1/auth/token/refresh-cookie
+Origin: http://127.0.0.1:8080
+Cookie: refreshToken={{refreshCookie}}
+
+> {%
+    client.global.set("access", response.body.accessToken);
+    const cookies = response.headers.valuesOf("Set-Cookie");
+    for (let i = 0; i < cookies.length; i++) {
+        if (cookies[i].startsWith("refreshToken=")) {
+            client.global.set("refreshCookie", cookies[i].split(";")[0].substring("refreshToken=".length));
+        }
+    }
+%}
+
+### 3. 새 access로 /me: 200 kdt01
+# 서버는 Authorization 헤더의 access만 확인합니다.
+GET {{base}}/api/v1/auth/me
+Authorization: Bearer {{access}}
+
+### 4. 쿠키만으로 /me: 401 TOKEN_FAILED
+# 쿠키만 보내면 /me는 401입니다.
+GET {{base}}/api/v1/auth/me
+Cookie: refreshToken={{refreshCookie}}
+
+### 5. 허용된 출처·가짜 refresh: 401 TOKEN_FAILED
+# 출처 검사는 통과하고, 쿠키 값 검증에서 401이 됩니다.
+POST {{base}}/api/v1/auth/token/refresh-cookie
+Origin: http://127.0.0.1:8080
+Cookie: refreshToken={{testInvalidRefreshToken}}
+
+### 6. 출처 없음: 403 FORBIDDEN
+# Origin 헤더가 없어 쿠키 값을 확인하기 전에 403으로 끝납니다.
+POST {{base}}/api/v1/auth/token/refresh-cookie
+Cookie: refreshToken={{refreshCookie}}
+
+### 7. 허용된 출처·쿠키 없음: 401 TOKEN_FAILED
+# Origin 검사는 통과하지만 재발급에 필요한 refresh 쿠키가 없어 거절됩니다.
+// @no-cookie-jar
+POST {{base}}/api/v1/auth/token/refresh-cookie
+Origin: http://127.0.0.1:8080
+
+### 8. Refresh 쿠키 삭제: 204, 본문 없음
+# 같은 이름·Path에 Max-Age=0인 Set-Cookie 응답을 확인합니다.
+POST {{base}}/api/v1/auth/logout-cookie
+Origin: http://127.0.0.1:8080
+Cookie: refreshToken={{refreshCookie}}
+
+### 9. 쿠키 없는 재발급: 401 TOKEN_FAILED
+# Cookie 헤더를 넣지 않습니다. 저장된 refresh 쿠키도 없어야 합니다.
+POST {{base}}/api/v1/auth/token/refresh-cookie
+Origin: http://127.0.0.1:8080
+
+### 10. 삭제 전에 복사한 유효한 access: 200 kdt01
+GET {{base}}/api/v1/auth/me
+Authorization: Bearer {{access}}
+
+### 11. 삭제 전에 복사한 refresh를 수동 전송: 현재 구현에서는 200
+# 이전 토큰의 서버 폐기 기능이 없음을 확인하는 요청입니다.
+# 이 응답의 새 쿠키는 저장하지 않습니다.
+// @no-cookie-jar
+POST {{base}}/api/v1/auth/token/refresh-cookie
+Origin: http://127.0.0.1:8080
+Cookie: refreshToken={{refreshCookie}}
+
+### 12. Origin 없는 쿠키 삭제: 403 FORBIDDEN
+POST {{base}}/api/v1/auth/logout-cookie

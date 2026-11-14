@@ -48,6 +48,20 @@ paths = ['''(?:^|/)src/main/java/com/kdt/security/(?:AuthService|JwtService)\.ja
 # 예외로 허용할 줄 3가지: 헤더에서 토큰 꺼내기, Bearer 떼고 다듬기, 토큰이 비었는지 검사하기.
 regexes = ['''^\s*String\s+token\s*=\s*this\.jwtService\.bearerValue\(authorization\);\s*$''', '''^\s*String\s+token\s*=\s*authorization\.substring\("Bearer "\.length\(\)\)\.trim\(\);\s*$''', '''^\s*if\s*\(token\s*==\s*null\s*\|\|\s*token\.isBlank\(\)\)\s*\{\s*$''']
 
+# Cookie parsing and null guard: no embedded credential values.
+
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "line"
+paths = ['''(?:^|/)src/main/java/com/kdt/security/AuthController\.java$''']
+regexes = ['''^\s*if\s*\(refreshToken\s*==\s*null\s*\|\|\s*refreshToken\.isBlank\(\)\)\s*\{\s*$''']
+
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "line"
+paths = ['''(?:^|/)src/test/http/04-cookie\.http$''']
+regexes = ['''^\s*client\.global\.set\("refreshCookie",\ cookies\[i\]\.split\(";"\)\[0\]\.substring\("refreshToken="\.length\)\);\s*$''', '''^\s*if\ \(cookies\[i\]\.startsWith\("refreshToken="\)\)\ \{\s*$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"
