@@ -70,6 +70,14 @@ regexTarget = "line"
 paths = ['''(?:^|/)src/main/java/com/kdt/security/MemberUserDetailsService\.java$''']
 regexes = ['''^\s*String\ password\ =\ member\.getPassword\(\);\s*$''', '''^\s*if\ \(password\ ==\ null\ \|\|\ password\.isBlank\(\)\)\ \{\s*$''']
 
+
+# Extract the request token; this statement contains no literal credential.
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "line"
+paths = ['''(?:^|/)src/main/java/com/kdt/security/JwtAuthFilter\.java$''']
+regexes = ['''^\s*String\ token\ =\ this\.jwtService\.bearerValue\(header\);\s*$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"
