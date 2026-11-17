@@ -62,6 +62,14 @@ regexTarget = "line"
 paths = ['''(?:^|/)src/test/http/04-cookie\.http$''']
 regexes = ['''^\s*client\.global\.set\("refreshCookie",\ cookies\[i\]\.split\(";"\)\[0\]\.substring\("refreshToken="\.length\)\);\s*$''', '''^\s*if\ \(cookies\[i\]\.startsWith\("refreshToken="\)\)\ \{\s*$''']
 
+
+# Read the stored credential and check emptiness; no literal password.
+[[rules.allowlists]]
+condition = "AND"
+regexTarget = "line"
+paths = ['''(?:^|/)src/main/java/com/kdt/security/MemberUserDetailsService\.java$''']
+regexes = ['''^\s*String\ password\ =\ member\.getPassword\(\);\s*$''', '''^\s*if\ \(password\ ==\ null\ \|\|\ password\.isBlank\(\)\)\ \{\s*$''']
+
 [[rules]]
 id = "credential-in-url"
 description = "Credentials embedded in URL"
