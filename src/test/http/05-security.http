@@ -1,0 +1,75 @@
+# HTTP Client의 URL 변수입니다. 서버의 환경변수가 아닙니다.
+@base = http://127.0.0.1:8080
+# 다른 작성자(kdt02)의 실제 글 id입니다. 2번 목록에서 확인한 값입니다.
+@otherPostId = 3
+# access와 ownPostId는 1번·3번 응답에서 자동 저장합니다. (위에 @로 따로 적지 않습니다)
+
+### 1. 토큰 발급: 200
+# 비밀번호로 로컬 토큰을 발급받고 accessToken을 자동 저장합니다.
+POST {{base}}/api/v1/auth/token
+Content-Type: application/json
+
+{"loginId":"kdt01","password":"{{testLoginPassword}}"}
+
+> {% client.global.set("access", response.body.accessToken); %}
+
+### 2. 공개 목록: 200
+# 공개 목록에서 실제 id·loginId를 읽고 자기 글·다른 작성자의 글을 구분합니다.
+GET {{base}}/api/v1/posts
+
+### 3. 자기 글 생성: 201. 응답 id를 ownPostId로 자동 저장합니다.
+# 인증된 회원을 작성자로 정합니다. JSON에는 title·body만 보냅니다.
+POST {{base}}/api/v1/posts
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"title":"JWT 연습 글","body":"작성자는 서버가 정합니다."}
+
+> {% client.global.set("ownPostId", response.body.id); %}
+
+### 4. 자기 글 수정: 200
+# 인증된 회원이 자기 글을 수정합니다. 200과 바뀐 제목을 확인합니다.
+PUT {{base}}/api/v1/posts/{{ownPostId}}
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"title":"JWT 수정 완료","body":"변경된 본문"}
+
+### 5. Bearer 없음: 401 TOKEN_FAILED
+# X-Api-Key만 보냅니다. Security가 Controller 앞에서 401로 거절합니다.
+PUT {{base}}/api/v1/posts/{{ownPostId}}
+X-Api-Key: {{testSecurityApiKey}}
+Content-Type: application/json
+
+{"title":"변경되면 안 됩니다","body":"거절 확인"}
+
+### 6. 남의 글 삭제: 403 FORBIDDEN
+# 인증은 통과했지만 작성자가 달라 Service가 ForbiddenException을 던집니다.
+DELETE {{base}}/api/v1/posts/{{otherPostId}}
+Authorization: Bearer {{access}}
+
+### 7. 자기 연습 글 삭제: 204, 본문 없음
+# 자기 글은 삭제되고 응답 본문은 비어 있습니다.
+DELETE {{base}}/api/v1/posts/{{ownPostId}}
+Authorization: Bearer {{access}}
+
+### 8. 목록: 지운 연습 글은 없고 남의 글은 그대로입니다.
+GET {{base}}/api/v1/posts
+
+### 9. 현재 사용자: 200 kdt01
+# 현재 /me는 access Bearer를 확인합니다. 쿠키·API Key로 대신 열리지 않습니다.
+GET {{base}}/api/v1/auth/me
+Authorization: Bearer {{access}}
+
+### 10. 삭제가 끝난 자기 연습 글 수정: 404 NOT_FOUND
+# 7번에서 지운 ownPostId를 그대로 사용합니다.
+PUT {{base}}/api/v1/posts/{{ownPostId}}
+Authorization: Bearer {{access}}
+Content-Type: application/json
+
+{"title":"없는 글","body":"404 확인"}
+
+### 11. 공개 목록에 잘못된 Bearer: 200
+# 필터는 인증을 만들지 못하지만 공개 GET 규칙은 통과합니다. 인증 성공을 뜻하지는 않습니다.
+GET {{base}}/api/v1/posts
+Authorization: Bearer broken
