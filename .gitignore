@@ -156,3 +156,7 @@ replay_pid*
 
 **/META-INF/persistence.xml
 **/db-local.properties
+src/test/http/07-kakao.http
+# Private Kakao requests and notes (at any directory depth)
+07-kakao.http
+kakao-test.txt

@@ -17,6 +17,8 @@ def git(*args):
 def blocked(name):
     p = PurePosixPath(name)
     n = p.name.lower()
+    if n in {'07-kakao.http', 'kakao-test.txt'}:
+        return True
     if any(x.lower() in {'.idea', '.gradle', '.run', 'build', 'out', 'secrets',
                          'credentials', 'dumps', 'backups', 'logs', 'log'} for x in p.parts):
         return True
