@@ -74,6 +74,8 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-security'
     // MockMvc의 Security·CSRF·시험용 인증 지원을 사용합니다.
     testImplementation 'org.springframework.security:spring-security-test'
+    // 외부 인가·토큰 교환·사용자 조회를 처리할 기능입니다.
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
 }
 
 // test 태스크 설정
